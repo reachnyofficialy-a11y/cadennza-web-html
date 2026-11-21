@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CADENZZA">
+<title>CADENZZA — Android → iOS Unity3D Converter</title>
+<style>
+:root{
+  --bg:#0b0d10;--card:#151921;--card2:#1b212c;--line:#262d3a;--txt:#e7ecf3;--mut:#8b96a8;
+  --acc:#7c5cff;--acc2:#38bdf8;--ok:#2fd27a;--warn:#f5b642;--bad:#ff5c6c;--r:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--txt);
+  font:16px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
+  -webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.wrap{max-width:640px;margin:0 auto;padding:16px}
+header{padding:10px 2px 4px}
+h1{font-size:24px;margin:0;letter-spacing:.6px}
+h1 span{background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin:14px 0}
+.card h2{font-size:15px;margin:0 0 12px;text-transform:uppercase;letter-spacing:.8px;color:#c8d0de}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border:0;border-radius:14px;
+  font-size:17px;font-weight:600;padding:14px;color:#fff;background:var(--card2);text-decoration:none;cursor:pointer;
+  touch-action:manipulation;-webkit-appearance:none;appearance:none}
+.btn.primary{background:linear-gradient(135deg,var(--acc),#5b8cff);box-shadow:0 6px 20px rgba(124,92,255,.35)}
+.btn:disabled{opacity:.4;box-shadow:none}
+.btn:active:not(:disabled){transform:scale(.98)}
+.drop{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:120px;
+  border:2px dashed #34405a;border-radius:var(--r);color:var(--mut);text-align:center;padding:16px;overflow:hidden;background:var(--card2)}
+.drop input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px}
+.drop .big{color:var(--txt);font-size:17px;font-weight:600;margin-bottom:4px}
+.fmeta{margin-top:10px;font-size:14px;color:var(--mut);word-break:break-all}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.seg button{min-height:58px;border-radius:14px;border:1px solid var(--line);background:var(--card2);color:var(--txt);
+  font-size:20px;font-weight:700;cursor:pointer;touch-action:manipulation;font-family:inherit}
+.seg button small{display:block;font-size:11px;font-weight:500;color:var(--mut);margin-top:2px}
+.seg button[aria-pressed="true"]{border-color:var(--acc);background:rgba(124,92,255,.18);box-shadow:inset 0 0 0 1px var(--acc)}
+.hint{font-size:13px;color:var(--mut);margin-top:10px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px}
+.row + .row{border-top:1px solid var(--line)}
+.switch{position:relative;width:54px;height:32px;flex:0 0 auto}
+.switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:1}
+.slider{position:absolute;inset:0;background:#2a3140;border-radius:32px;transition:.2s}
+.slider:before{content:"";position:absolute;width:26px;height:26px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.switch input:checked + .slider{background:var(--acc)}
+.switch input:checked + .slider:before{transform:translateX(22px)}
+code,.cmd{display:block;background:#07090c;border:1px solid var(--line);border-radius:10px;padding:10px;
+  font:13px/1.5 ui-monospace,Menlo,monospace;color:#b8c2d6;word-break:break-word;margin-top:12px}
+.bar{height:14px;background:#222a37;border-radius:9px;overflow:hidden}
+.bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .25s}
+.pinfo{display:flex;justify-content:space-between;font-size:14px;color:var(--mut);margin:8px 0 12px}
+#status{color:var(--txt)}
+.log{background:#07090c;border:1px solid var(--line);border-radius:12px;height:260px;overflow:auto;padding:10px;
+  font:12px/1.55 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-word;color:#b8c2d6;-webkit-overflow-scrolling:touch}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+#vsum{font-weight:700;font-size:16px;padding:10px 12px;border-radius:12px;background:var(--card2);margin-bottom:6px}
+#vsum.ok{color:var(--ok)}#vsum.warn{color:var(--warn)}#vsum.bad{color:var(--bad)}
+ul.checks{list-style:none;padding:0;margin:10px 0 0}
+ul.checks li{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+ul.checks .ic{flex:0 0 22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#0b0d10}
+.ic.ok{background:var(--ok)}.ic.warn{background:var(--warn)}.ic.bad{background:var(--bad)}
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:12px;max-height:340px;overflow-y:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;word-break:break-word}
+th{position:sticky;top:0;background:var(--card2);color:var(--mut);font-weight:600}
+td.ok{color:var(--ok)}td.warn{color:var(--warn)}td.bad{color:var(--bad)}
+.tbl2 th,.tbl2 td{font-size:13px}
+ol.steps{padding-left:20px;margin:0}
+ol.steps li{margin:8px 0}
+a{color:var(--acc2)}
+.note{font-size:13px;color:var(--mut);margin-top:10px}
+footer{text-align:center;color:#55607a;font-size:12px;padding:18px 0 30px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1><span>CADENZZA</span></h1>
+  <div class="sub">Android → iOS Unity3D asset bundle converter · iPhone browser edition</div>
+</header>
+
+<!-- 1. INPUT -->
+<section class="card">
+  <h2>1 · Choose input</h2>
+  <label class="drop">
+    <input id="file" type="file" accept=".zip,.unity3d,.bundle,.assets,.bin,application/zip,application/octet-stream">
+    <div class="big">Tap to choose a .zip or .unity3d</div>
+    <div class="sub">Files app, iCloud Drive, or On My iPhone</div>
+  </label>
+  <div class="fmeta" id="fmeta">No file selected</div>
+  <div class="fmeta" id="fname" style="color:var(--txt);font-weight:600"></div>
+</section>
+
+<!-- 2. OPTIONS -->
+<section class="card">
+  <h2>2 · Options</h2>
+  <div style="font-size:14px;color:var(--mut);margin-bottom:8px">ASTC block size</div>
+  <div class="seg" role="group" aria-label="ASTC block size">
+    <button type="button" data-block="4" aria-pressed="false">4<small>best quality</small></button>
+    <button type="button" data-block="6" aria-pressed="true">6<small>balanced</small></button>
+    <button type="button" data-block="8" aria-pressed="false">8<small>smaller</small></button>
+    <button type="button" data-block="12" aria-pressed="false">12<small>smallest</small></button>
+  </div>
+  <div class="hint" id="blockNote">6×6 · balanced</div>
+
+  <div style="margin-top:14px">
+    <div class="row">
+      <div>
+        <div style="font-weight:600">--rename-platform-dirs</div>
+        <div class="sub">Rewrite <code style="display:inline;padding:1px 5px;margin:0">android</code> folders to <code style="display:inline;padding:1px 5px;margin:0">ios</code></div>
+      </div>
+      <label class="switch">
+        <input id="rename" type="checkbox" aria-label="Rename platform directories">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+  <div class="cmd" id="cmd">cadenzza convert &lt;bundle&gt; --astc-block 6</div>
+</section>
+
+<!-- 3. RUN -->
+<section class="card">
+  <h2>3 · Convert</h2>
+  <button id="runBtn" class="btn primary" type="button" disabled>Run conversion</button>
+  <div class="pinfo"><span id="status">Idle</span><span id="pct">0%</span></div>
+  <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div id="barFill"></div></div>
+  <div style="height:14px"></div>
+  <div class="log" id="log" aria-live="polite"></div>
+</section>
+
+<!-- 4. VERIFICATION -->
+<section class="card" id="verifyCard" hidden>
+  <h2>4 · Post-run verification</h2>
+  <div id="vsum"></div>
+  <div class="sub" id="vstats"></div>
+  <ul class="checks" id="checks"></ul>
+  <div class="tblwrap"><table class="tbl2"><tbody id="ftable"></tbody></table></div>
+</section>
+
+<!-- 5. DOWNLOAD -->
+<section class="card">
+  <h2>5 · Download</h2>
+  <a id="dl" class="btn primary" hidden href="#" download="cadenzza_output.zip">Download</a>
+  <div class="note">Safari saves the archive to the Files app → Downloads. If Safari previews the zip instead, tap the Share icon and choose Save to Files. The archive contains the converted tree, <b>conversion-manifest.json</b> and <b>CADENZZA_REPORT.txt</b>.</div>
+</section>
+
+<!-- CAPABILITIES -->
+<section class="card">
+  <h2>What this page can and cannot do</h2>
+  <table class="tbl2">
+    <thead><tr><th>Step</th><th>In this page (browser JS)</th><th>Needs native tool or backend</th></tr></thead>
+    <tbody>
+      <tr><td>Read .zip entries</td><td class="ok">Yes (JSZip)</td><td>—</td></tr>
+      <tr><td>Mirror folders, android → ios</td><td class="ok">Yes</td><td>—</td></tr>
+      <tr><td>Byte-copy + verify sound banks</td><td class="ok">Yes (SHA-256 both sides)</td><td>—</td></tr>
+      <tr><td>Detect ASTC / PVRTC / ETC textures</td><td class="ok">Yes (KTX, PVR v3, ASTC headers)</td><td>—</td></tr>
+      <tr><td>Leave ASTC / PVRTC untouched</td><td class="ok">Yes</td><td>—</td></tr>
+      <tr><td>Read UnityFS header (version, size)</td><td class="ok">Yes (header only)</td><td>—</td></tr>
+      <tr><td>Decompress LZ4/LZMA blocks, parse SerializedFile</td><td class="bad">No</td><td>Unity CLI / UnityPy-class tool, or Xcode C++ worker</td></tr>
+      <tr><td>Retarget platform flag to iOS</td><td class="bad">No</td><td>Native bundle rewriter, then repack</td></tr>
+      <tr><td>Re-encode Android GPU textures to ASTC 4/6/8/12</td><td class="bad">No</td><td>astcenc (C++) on a Mac or backend worker</td></tr>
+    </tbody>
+  </table>
+  <div class="note">Textures and bundles that need the native steps are copied unchanged here and marked <b>PENDING</b> in the report, so nothing is silently claimed as converted. For full conversion, send the input to a backend worker (Unity CLI + astcenc) and use this page as its front end.</div>
+</section>
+
+<!-- HOW TO RUN -->
+<section class="card">
+  <h2>Run on iPhone</h2>
+  <ol class="steps">
+    <li>Save <b>index.html</b> to Files (On My iPhone or iCloud Drive).</li>
+    <li>Easiest: host it on <b>GitHub Pages</b> (upload to a repo, enable Pages in Settings) and open the https link in Safari.</li>
+    <li>Or tap <b>index.html</b> in Files, then Share → <b>Open in Safari</b> if offered. If you only see source code, use GitHub Pages instead.</li>
+    <li>Internet is needed once so JSZip can load from the CDN.</li>
+    <li>Choose a .zip or .unity3d, pick the ASTC block size, toggle the rename option, tap Run, then Download.</li>
+  </ol>
+</section>
+
+<footer>CADENZZA · client-side processing · files never leave this device</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+const $ = id => document.getElementById(id);
+const tick = () => new Promise(r => setTimeout(r, 0));
+const HAS_SUBTLE = !!(window.crypto && window.crypto.subtle);
+const HASH_ALGO = HAS_SUBTLE ? 'SHA-256' : 'FNV-1a 32 (fallback)';
+const BLOCK_LABEL = {4:'best quality',6:'balanced',8:'smaller',12:'smallest'};
+const SOUND_EXT = ['.bank','.bnk','.fsb','.wem','.ogg','.wav','.mp3','.aif','.aiff','.caf'];
+const state = {file:null, block:6, rename:false, busy:false, url:null};
+
+/* ---------- helpers ---------- */
+const fmtBytes = n => n<1024 ? n+' B' : n<1048576 ? (n/1024).toFixed(1)+' KB' : n<1073741824 ? (n/1048576).toFixed(1)+' MB' : (n/1073741824).toFixed(2)+' GB';
+const extOf = n => { const m = String(n).toLowerCase().match(/\.[^./\\]+$/); return m ? m[0] : ''; };
+const sanitize = p => String(p).replace(/\\/g,'/').split('/').filter(s => s && s !== '.' && s !== '..').join('/');
+const mapPath = p => state.rename ? p.split('/').map(s => s.toLowerCase()==='android' ? 'ios' : s).join('/') : p;
+
+function readBuf(blob){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = () => rej(r.error || new Error('read failed'));
+    r.readAsArrayBuffer(blob);
+  });
+}
+async function looksLikeZip(f){
+  const b = new Uint8Array(await readBuf(f.slice(0,4)));
+  return b[0]===0x50 && b[1]===0x4B;
+}
+function fnv1a(b){
+  let h = 0x811c9dc5;
+  for (let i=0;i<b.length;i++){ h ^= b[i]; h = Math.imul(h, 0x01000193) >>> 0; }
+  return h.toString(16).padStart(8,'0');
+}
+const toHex = buf => Array.from(new Uint8Array(buf), x => x.toString(16).padStart(2,'0')).join('');
+async function hashBytes(b){
+  if (HAS_SUBTLE){
+    try { return toHex(await crypto.subtle.digest('SHA-256', b)); } catch(e) {}
+  }
+  return 'fnv:' + fnv1a(b);
+}
+function readCString(b, off, max){
+  max = max || 256;
+  let e = off;
+  while (e < b.length && e < off+max && b[e] !== 0) e++;
+  let s = '';
+  for (let i=off;i<e;i++) s += String.fromCharCode(b[i]);
+  return {s, next:e+1};
+}
+
+/* ---------- inspection ---------- */
+function sniff(b){
+  const n = b.byteLength;
+  const dv = new DataView(b.buffer, b.byteOffset, n);
+  const ascii = (o,k) => { let s=''; for (let i=0;i<k && o+i<n;i++) s += String.fromCharCode(b[o+i]); return s; };
+
+  if (n>=4 && b[0]===0x13 && b[1]===0xAB && b[2]===0xA1 && b[3]===0x5C)
+    return {kind:'ASTC', detail:'ASTC texture (magic 13 AB A1 5C)'};
+
+  if (n>=16 && dv.getUint32(0,true)===0x03525650){
+    const fmt = dv.getUint32(8,true);
+    return fmt<=3
+      ? {kind:'PVRTC', detail:`PVR v3, PVRTC format ${fmt}`}
+      : {kind:'TEX_OTHER', detail:`PVR v3, format ${fmt}`};
+  }
+
+  if (n>=32 && b[0]===0xAB && ascii(1,6)==='KTX 11'){
+    const f = dv.getUint32(28,true);
+    const hx = '0x'+f.toString(16).toUpperCase();
+    if (f>=0x8C00 && f<=0x8C03) return {kind:'PVRTC', detail:`KTX PVRTC (${hx})`};
+    if (f>=0x93B0 && f<=0x93BD) return {kind:'ASTC', detail:`KTX ASTC (${hx})`};
+    if (f===0x8D64) return {kind:'ETC', detail:'KTX ETC1 (Android GPU format)'};
+    if (f>=0x9270 && f<=0x9279) return {kind:'ETC', detail:`KTX ETC2/EAC (${hx}, Android GPU format)`};
+    return {kind:'TEX_OTHER', detail:`KTX internal format ${hx}`};
+  }
+
+  const sig = ascii(0,8);
+  if (sig.startsWith('UnityFS') || sig.startsWith('UnityWeb') || sig.startsWith('UnityRaw')){
+    const d = {kind:'UNITY_BUNDLE', detail: sig.replace(/\0/g,'')};
+    if (sig.startsWith('UnityFS') && n>=24){
+      try {
+        const ver = dv.getUint32(8,false);
+        const a = readCString(b,12);
+        const r = readCString(b,a.next);
+        let size = 0;
+        if (r.next+8<=n) size = dv.getUint32(r.next,false)*4294967296 + dv.getUint32(r.next+4,false);
+        d.detail = `UnityFS v${ver}, player ${a.s||'?'}, declared ${fmtBytes(size)}`;
+      } catch(e) {}
+    }
+    return d;
+  }
+  return {kind:'UNKNOWN', detail:'no known signature'};
+}
+
+function decide(ext, sn, block){
+  if (SOUND_EXT.includes(ext))
+    return {action:'SOUND', status:'ok', note:'sound bank: copied byte-for-byte, hash-verified'};
+  switch (sn.kind){
+    case 'ASTC':  return {action:'KEEP', status:'ok', note:'already ASTC, left untouched'};
+    case 'PVRTC': return {action:'KEEP', status:'ok', note:'already PVRTC, left untouched'};
+    case 'ETC':   return {action:'RECOMPRESS', status:'warn', note:`Android texture to ASTC ${block}x${block} needs native encoder (astcenc); copied unchanged, PENDING`};
+    case 'UNITY_BUNDLE': return {action:'BUNDLE', status:'warn', note:'platform flag retarget and texture re-encode need native Unity tooling; copied unchanged, PENDING'};
+    case 'TEX_OTHER': return {action:'REVIEW', status:'warn', note:'texture format not recognised; copied unchanged'};
+    default:
+      if (ext==='.unity3d' || ext==='.bundle')
+        return {action:'REVIEW', status:'warn', note:'Unity extension but no known signature; copied unchanged'};
+      return {action:'COPY', status:'ok', note:'copied unchanged'};
+  }
+}
+
+/* ---------- UI helpers ---------- */
+function logLine(msg, level){
+  const d = document.createElement('div');
+  d.className = level || '';
+  d.textContent = `[${new Date().toLocaleTimeString([], {hour12:false})}] ${msg}`;
+  const box = $('log');
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+}
+function setProgress(p, text){
+  p = Math.max(0, Math.min(100, p));
+  $('barFill').style.width = p + '%';
+  $('pct').textContent = Math.round(p) + '%';
+  if (text) $('status').textContent = text;
+}
+function setBusy(b){
+  state.busy = b;
+  $('runBtn').disabled = b || !state.file;
+  $('file').disabled = b;
+}
+function updateCmd(){
+  $('cmd').textContent = `cadenzza convert <bundle> --astc-block ${state.block}${state.rename ? ' --rename-platform-dirs' : ''}`;
+}
+function offerDownload(blob, name){
+  if (state.url) URL.revokeObjectURL(state.url);
+  state.url = URL.createObjectURL(blob);
+  const a = $('dl');
+  a.href = state.url;
+  a.download = name;
+  a.textContent = `Download ${name} (${fmtBytes(blob.size)})`;
+  a.hidden = false;
+}
+
+/* ---------- verification ---------- */
+async function verifyOutput(blob, results, block){
+  const checks = [];
+  const add = (level,label,detail) => checks.push({level,label,detail});
+  const z = await JSZip.loadAsync(blob);
+  const outFiles = Object.keys(z.files).filter(n => !z.files[n].dir);
+  const live = results.filter(r => r.status !== 'fail');
+
+  // 1. file set
+  const expected = new Set(live.map(r => r.dst).concat(['conversion-manifest.json']));
+  const missing = [...expected].filter(p => !z.file(p));
+  const extra = outFiles.filter(p => !expected.has(p));
+  add(missing.length||extra.length ? 'bad':'ok',
+      `File set matches source (${live.length} files)`,
+      missing.length||extra.length ? `missing ${missing.length}, unexpected ${extra.length}` : 'every source file present, nothing added');
+
+  // 2. folder mirror
+  const dirsOf = p => { const s=p.split('/'); const o=[]; for (let i=1;i<s.length;i++) o.push(s.slice(0,i).join('/')); return o; };
+  const raw = new Set();
+  live.forEach(r => dirsOf(r.src).forEach(d => raw.add(d)));
+  const byDst = new Map();
+  raw.forEach(d => { const m = mapPath(d); byDst.set(m, (byDst.get(m)||0)+1); });
+  const srcDirs = new Set(byDst.keys());
+  const outDirs = new Set();
+  outFiles.forEach(p => dirsOf(p).forEach(d => outDirs.add(d)));
+  const dMiss = [...srcDirs].filter(d => !outDirs.has(d));
+  const dExtra = [...outDirs].filter(d => !srcDirs.has(d));
+  add(dMiss.length||dExtra.length ? 'bad':'ok',
+      `Folder tree mirrored (${srcDirs.size} folders)`,
+      dMiss.length||dExtra.length ? `missing ${dMiss.length}, unexpected ${dExtra.length}` : 'output folder structure matches source exactly');
+  const merged = [...byDst.values()].filter(c => c>1).length;
+  if (merged) add('warn','Folders merged by rename', `${merged} android/ios folder pair(s) combined; check for name clashes`);
+
+  // 3. byte identity (hash on both sides)
+  let same = 0; const diff = [];
+  for (const r of live){
+    const f = z.file(r.dst);
+    if (!f){ diff.push(r.dst); continue; }
+    const ob = await f.async('uint8array');
+    r.outHash = await hashBytes(ob);
+    r.verified = ob.byteLength===r.size && r.outHash===r.srcHash;
+    if (r.verified) same++; else diff.push(r.dst);
+  }
+  add(diff.length ? 'bad':'ok',
+      `Byte-identical copies (${same}/${live.length})`,
+      diff.length ? `mismatch: ${diff.slice(0,3).join(', ')}` : `${HASH_ALGO} of every output file matches its source`);
+
+  // 4. category rules
+  const snd = live.filter(r => r.action==='SOUND');
+  if (snd.length) add(snd.every(r=>r.verified)?'ok':'bad', `Sound banks verified (${snd.filter(r=>r.verified).length}/${snd.length})`, 'copied byte-for-byte, size and hash checked');
+  const keep = live.filter(r => r.action==='KEEP');
+  if (keep.length) add(keep.every(r=>r.verified)?'ok':'bad', `ASTC/PVRTC textures untouched (${keep.length})`, 'no re-encode applied to these files');
+  const rec = live.filter(r => r.action==='RECOMPRESS');
+  if (rec.length) add('warn', `Android textures pending ASTC encode (${rec.length})`, `target ASTC ${block}x${block}; needs native encoder, see capability table`);
+  const bun = live.filter(r => r.action==='BUNDLE' || r.action==='REVIEW');
+  if (bun.length) add('warn', `Unity bundles pending native processing (${bun.length})`, 'platform flag not retargeted in-browser');
+
+  // 5. rename rule
+  const renamed = live.filter(r => r.src!==r.dst).length;
+  if (state.rename){
+    const leftover = outFiles.filter(p => p.split('/').some(s => s.toLowerCase()==='android')).length;
+    add(leftover?'bad':'ok', `android → ios folder rename (${renamed} paths)`, leftover ? `${leftover} paths still contain android` : 'no android folders remain');
+  } else {
+    add(renamed?'bad':'ok', 'Folder names kept as-is', 'rename-platform-dirs OFF: no paths changed');
+  }
+
+  // 6. skipped + manifest
+  const failed = results.filter(r => r.status==='fail').length;
+  if (failed) add('bad','Skipped entries', `${failed} entries skipped (path collisions)`);
+  try {
+    const mf = JSON.parse(await z.file('conversion-manifest.json').async('string'));
+    add('ok','Manifest readable', `${mf.files.length} entries recorded`);
+  } catch(e){ add('bad','Manifest unreadable', String(e.message||e)); }
+
+  const level = checks.some(c=>c.level==='bad') ? 'bad' : checks.some(c=>c.level==='warn') ? 'warn' : 'ok';
+  const summary = level==='bad' ? 'FAILED: see checks below'
+                : level==='warn' ? 'PASSED with warnings (native steps pending)'
+                : 'PASSED';
+  return {
+    checks, level, summary,
+    stats:{ total:live.length, verified:same, sounds:snd.length, kept:keep.length,
+            pending:rec.length+bun.length, renamed, skipped:failed }
+  };
+}
+
+function renderVerify(v, results){
+  $('verifyCard').hidden = false;
+  const s = $('vsum');
+  s.className = v.level;
+  s.textContent = v.summary;
+  const st = v.stats;
+  $('vstats').textContent = `${st.verified}/${st.total} byte-identical · ${st.sounds} sound banks · ${st.kept} ASTC/PVRTC kept · ${st.pending} pending native · ${st.renamed} renamed · ${st.skipped} skipped`;
+
+  const ul = $('checks'); ul.innerHTML = '';
+  v.checks.forEach(c => {
+    const li = document.createElement('li');
+    const ic = document.createElement('span');
+    ic.className = 'ic ' + c.level;
+    ic.textContent = c.level==='ok' ? '✓' : c.level==='warn' ? '!' : '✕';
+    const tx = document.createElement('div');
+    const b = document.createElement('b'); b.textContent = c.label;
+    const d = document.createElement('div'); d.className = 'sub'; d.textContent = c.detail;
+    tx.append(b, d);
+    li.append(ic, tx);
+    ul.appendChild(li);
+  });
+
+  const tb = $('ftable'); tb.innerHTML = '';
+  const head = document.createElement('tr');
+  ['File','Action','Status'].forEach(h => { const th = document.createElement('th'); th.textContent = h; head.appendChild(th); });
+  tb.appendChild(head);
+  results.slice(0,500).forEach(r => {
+    const tr = document.createElement('tr');
+    const a = document.createElement('td'); a.textContent = r.dst;
+    const b = document.createElement('td'); b.textContent = r.action || 'SKIP';
+    const c = document.createElement('td');
+    c.className = r.status;
+    c.textContent = r.status==='ok' ? 'OK' : r.status==='warn' ? 'PENDING' : 'SKIPPED';
+    tr.append(a,b,c);
+    tb.appendChild(tr);
+  });
+  if (results.length>500){
+    const tr = document.createElement('tr');
+    const td = document.createElement('td'); td.colSpan = 3;
+    td.textContent = `…and ${results.length-500} more (see CADENZZA_REPORT.txt)`;
+    tr.appendChild(td); tb.appendChild(tr);
+  }
+}
+
+function buildReport(file, results, v){
+  const L = [];
+  L.push('CADENZZA — Android → iOS Unity3D Asset Bundle Conversion Report');
+  L.push(`Generated: ${new Date().toISOString()}`);
+  L.push(`Input: ${file.name}`);
+  L.push(`ASTC block: ${state.block}x${state.block} (${BLOCK_LABEL[state.block]})`);
+  L.push(`--rename-platform-dirs: ${state.rename ? 'ON' : 'OFF'}`);
+  L.push(`Hash: ${HASH_ALGO}`);
+  L.push('');
+  L.push(`RESULT: ${v.summary}`);
+  L.push('');
+  L.push('VERIFICATION (run on the archive before this report was added)');
+  v.checks.forEach(c => L.push(`  [${c.level.toUpperCase()}] ${c.label} : ${c.detail}`));
+  L.push('');
+  L.push('FILES  action | source -> output | kind | detail | note');
+  results.forEach(r => L.push(`  ${r.action||'SKIP'} | ${r.src}${r.dst!==r.src ? ' -> '+r.dst : ''} | ${r.kind||'-'} | ${r.detail||'-'} | ${r.note||''}`));
+  L.push('');
+  L.push('LIMITATIONS (browser build)');
+  L.push('  - UnityFS bundles are not decompressed; the platform flag is NOT retargeted here.');
+  L.push('  - Android ETC textures are NOT re-encoded to ASTC here; they are copied unchanged and marked PENDING.');
+  L.push('  - Run the native Unity/Xcode step or the backend worker for those actions.');
+  return L.join('\n');
+}
+
+/* ---------- main pipeline ---------- */
+async function runConversion(){
+  if (state.busy || !state.file) return;
+  if (typeof JSZip === 'undefined'){
+    logLine('JSZip did not load. Check the internet connection, then reload.', 'bad');
+    return;
+  }
+  setBusy(true);
+  $('log').innerHTML = '';
+  $('verifyCard').hidden = true;
+  $('dl').hidden = true;
+  const file = state.file;
+  const t0 = Date.now();
+
+  try {
+    logLine(`Input: ${file.name} (${fmtBytes(file.size)})`);
+    logLine(`Options: ASTC ${state.block}x${state.block} (${BLOCK_LABEL[state.block]}), rename-platform-dirs ${state.rename ? 'ON' : 'OFF'}`);
+    setProgress(3, 'Reading input…');
+
+    /* 1. extract */
+    const entries = [];
+    if (await looksLikeZip(file)){
+      const zin = await JSZip.loadAsync(file);
+      const names = Object.keys(zin.files).filter(n => !zin.files[n].dir);
+      logLine(`ZIP opened: ${names.length} files`);
+      for (let i=0;i<names.length;i++){
+        const data = await zin.files[names[i]].async('uint8array');
+        entries.push({src:names[i], data});
+        if (i%10===0){ setProgress(3+12*(i/names.length), `Extracting ${i+1}/${names.length}`); await tick(); }
+      }
+    } else {
+      logLine('Not a ZIP: processing as a single binary bundle');
+      entries.push({src:file.name, data:new Uint8Array(await readBuf(file))});
+    }
+
+    /* 2. classify + plan */
+    const results = [];
+    const seen = new Map();
+    const total = entries.length;
+    for (let i=0;i<total;i++){
+      const e = entries[i];
+      const src = sanitize(e.src);
+      const dst = mapPath(src);
+      const r = {src, dst, size:e.data.byteLength, kind:'', detail:'', action:'', status:'ok', note:'', srcHash:'', outHash:'', verified:false, data:e.data};
+      if (seen.has(dst)){
+        r.status='fail'; r.action='SKIP'; r.note=`path collision with ${seen.get(dst)}`;
+      } else {
+        seen.set(dst, src);
+        const sn = sniff(e.data);
+        r.kind = sn.kind; r.detail = sn.detail;
+        Object.assign(r, decide(extOf(src), sn, state.block));
+        r.srcHash = await hashBytes(e.data);
+      }
+      results.push(r);
+      logLine(`[${r.action||'SKIP'}] ${dst}${r.note ? ' : '+r.note : ''}`, r.status==='fail'?'bad':r.status==='warn'?'warn':'ok');
+      setProgress(15+55*((i+1)/total), `Classifying ${i+1}/${total}`);
+      if (i%5===0) await tick();
+    }
+
+    /* 3. pack */
+    setProgress(72, 'Packing output archive…');
+    const out = new JSZip();
+    results.forEach(r => { if (r.status!=='fail') out.file(r.dst, r.data, {binary:true, compression:'STORE'}); });
+    const manifest = {
+      tool:'CADENZZA', generated:new Date().toISOString(), input:file.name,
+      astcBlock:state.block, renamePlatformDirs:state.rename, hash:HASH_ALGO,
+      files: results.map(r => ({src:r.src, dst:r.dst, kind:r.kind, action:r.action, status:r.status, bytes:r.size, hash:r.srcHash}))
+    };
+    out.file('conversion-manifest.json', JSON.stringify(manifest, null, 2), {compression:'DEFLATE'});
+
+    /* 4. verify by round-tripping the archive */
+    setProgress(78, 'Verifying archive…');
+    let v;
+    {
+      const pass1 = await out.generateAsync({type:'blob', compression:'STORE'});
+      v = await verifyOutput(pass1, results, state.block);
+    }
+    logLine(`Verification: ${v.summary}`, v.level==='bad'?'bad':v.level==='warn'?'warn':'ok');
+
+    /* 5. report + final archive */
+    setProgress(92, 'Writing report…');
+    out.file('CADENZZA_REPORT.txt', buildReport(file, results, v), {compression:'DEFLATE'});
+    const finalBlob = await out.generateAsync({type:'blob', compression:'STORE'});
+    const base = file.name.replace(/\.[^.]+$/,'');
+    const name = `${base}_iOS_ASTC${state.block}${state.rename ? '_renamed' : ''}.zip`;
+    offerDownload(finalBlob, name);
+    renderVerify(v, results);
+    setProgress(100, `Done in ${((Date.now()-t0)/1000).toFixed(1)} s`);
+    logLine(`Output ready: ${name} (${fmtBytes(finalBlob.size)})`, 'ok');
+    $('dl').scrollIntoView({behavior:'smooth', block:'center'});
+  } catch (err){
+    console.error(err);
+    setProgress(0, 'Failed');
+    logLine('ERROR: ' + (err && err.message ? err.message : err), 'bad');
+    logLine('If the run stalled, the file may be too large for iPhone memory. Try a smaller archive.', 'warn');
+  } finally {
+    setBusy(false);
+  }
+}
+
+/* ---------- wiring ---------- */
+$('file').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  state.file = f;
+  $('fname').textContent = f.name;
+  $('fmeta').textContent = `${fmtBytes(f.size)} · ${extOf(f.name) || 'no extension'}`;
+  $('runBtn').disabled = false;
+  $('log').innerHTML = '';
+  if (f.size > 400*1048576) logLine('Large file (over 400 MB): iPhone Safari may run out of memory.', 'warn');
+  else logLine(`Selected ${f.name}`);
+});
+
+document.querySelectorAll('[data-block]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.block = +btn.dataset.block;
+    document.querySelectorAll('[data-block]').forEach(b => b.setAttribute('aria-pressed', b===btn ? 'true':'false'));
+    $('blockNote').textContent = `${state.block}×${state.block} · ${BLOCK_LABEL[state.block]}`;
+    updateCmd();
+  });
+});
+
+$('rename').addEventListener('change', e => { state.rename = e.target.checked; updateCmd(); });
+$('runBtn').addEventListener('click', runConversion);
+
+updateCmd();
+logLine('Ready. Choose a .zip or .unity3d file to begin.');
+})();
+</script>
+</body>
+</html>
