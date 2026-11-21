@@ -3,20 +3,25 @@ options:
   bundleIdPrefix: com.cadenza
   deploymentTarget:
     iOS: "16.0"
+  createIntermediateGroups: true
 targets:
   CADENZZA:
     type: application
     platform: iOS
     sources:
-      - path: Sources
-    resources:
+      - path: Sources/CadenzaApp.swift
+        buildPhase: sources
+      - path: Sources/WebContainerView.swift
+        buildPhase: sources
       - path: Sources/index.html
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.cadenza.app
         INFOPLIST_KEY_CFBundleDisplayName: CADENZZA
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        SWIFT_VERSION: "5.0"
         CODE_SIGN_STYLE: Manual
         CODE_SIGNING_ALLOWED: NO
         CODE_SIGNING_REQUIRED: NO
