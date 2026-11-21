@@ -1,0 +1,22 @@
+name: CADENZZA
+options:
+  bundleIdPrefix: com.cadenza
+  deploymentTarget:
+    iOS: "16.0"
+targets:
+  CADENZZA:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+    resources:
+      - path: Sources/index.html
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cadenza.app
+        INFOPLIST_KEY_CFBundleDisplayName: CADENZZA
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGNING_ALLOWED: NO
+        CODE_SIGNING_REQUIRED: NO
