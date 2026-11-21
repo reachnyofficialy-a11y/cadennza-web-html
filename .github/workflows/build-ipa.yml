@@ -1,0 +1,46 @@
+name: Build Unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-ipa:
+    runs-on: macos-15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build archive
+        run: |
+          xcodebuild \
+            -project CADENZZA.xcodeproj \
+            -scheme CADENZZA \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/CADENZZA.xcarchive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            archive
+
+      - name: Package IPA
+        run: |
+          mkdir -p build/ipa/Payload
+          cp -R build/CADENZZA.xcarchive/Products/Applications/CADENZZA.app build/ipa/Payload/
+          cd build/ipa
+          zip -r ../../CADENZZA.ipa Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CADENZZA-ipa
+          path: CADENZZA.ipa
